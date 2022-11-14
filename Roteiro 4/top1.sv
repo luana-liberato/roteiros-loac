@@ -1,5 +1,5 @@
 // DESCRIPTION: Verilator: Systemverilog example module
-// Roteiro 4 - RAM - Luana dos Santos Liberato
+// Roteiro 4 - Registrador Serial e Paralelo - Luana dos Santos Liberato
 
 parameter divide_by=100000000;  // divisor do clock de referência
 // A frequencia do clock de referencia é 50 MHz.
@@ -39,15 +39,33 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
+  logic reset;
   logic selecionador;
-  logic [1:0] end_entrada;
-  logic [3:0] entrada, saida; // LED[7:4]
+  logic ent_serial;
+  logic [3:0] ent_paralela, saida;
 
   always_comb begin
-    selecionador <= SWI[1];
-    end_entrada <= SWI[3:2];
-    entrada <= SWI[7:4];
+    reset <= SWI[1];
+    selecionador <= SWI[2];
+    ent_serial <= SWI[3];
+    ent_paralela <= SWI[7:4];
   end
 
-  
+  always_ff @(posedge clk_2 or posedge reset) begin
+    if (reset == 'b1) begin
+      saida <= 'b0000;
+    end
+    else if (selecionador == 'b1) begin
+      saida <= ent_paralela;
+    end
+    else begin
+      saida[3] <= ent_serial;
+      saida[2] <= saida[3];
+      saida[1] <= saida[2];
+      saida[0] <= saida[1];      
+    end
+
+    LED[7:4] <= saida;
+    LED[0] <= clk_2;
+  end
 endmodule
