@@ -1,5 +1,5 @@
 // DESCRIPTION: Verilator: Systemverilog example module
-// Roteiro 4 - Registrador Serial e Paralelo - Luana dos Santos Liberato
+// Roteiro 4 - Registrador Serial | Paralelo - Luana dos Santos Liberato
 
 parameter divide_by=100000000;  // divisor do clock de referência
 // A frequencia do clock de referencia é 50 MHz.
