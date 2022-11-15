@@ -53,7 +53,7 @@ module top(input  logic clk_2,
     ent_paralela <= SWI[7:4];
   end
 
-  // Lógica do funcionamento de um registrador considerando inicialment o reset, depois a entrada e saída parelala, e por último a lógica de um deslocamento.
+  // Lógica do funcionamento de um registrador considerando inicialmente o reset, depois a entrada e saída parelala, e por último a lógica de um deslocamento.
   always_ff @(posedge clk_2 or posedge reset) begin
     if (reset == 'b1) begin
       saida <= 'b0000;
