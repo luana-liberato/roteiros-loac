@@ -39,11 +39,13 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
+  // Definido fios.
   logic reset;
   logic selecionador;
   logic ent_serial;
   logic [3:0] ent_paralela, saida;
 
+  // Recebendo as entradas.
   always_comb begin
     reset <= SWI[1];
     selecionador <= SWI[2];
@@ -51,21 +53,29 @@ module top(input  logic clk_2,
     ent_paralela <= SWI[7:4];
   end
 
+  // Lógica do funcionamento de um registrador considerando inicialment o reset, depois a entrada e saída parelala, e por último a lógica de um deslocamento.
   always_ff @(posedge clk_2 or posedge reset) begin
     if (reset == 'b1) begin
       saida <= 'b0000;
     end
+
     else if (selecionador == 'b1) begin
       saida <= ent_paralela;
     end
+
     else begin
       saida[3] <= ent_serial;
       saida[2] <= saida[3];
       saida[1] <= saida[2];
       saida[0] <= saida[1];      
     end
+  end
 
+  // Definindo saídas.
+  always_comb begin
     LED[7:4] <= saida;
+
+    // Led que marca o clock.
     LED[0] <= clk_2;
   end
 endmodule

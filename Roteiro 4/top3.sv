@@ -39,13 +39,14 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
+  // Definido fios e os dados para leitura.
   parameter DADO_ZERO_ZERO = 'b0011; 
   parameter DADO_ZERO_UM = 'b0110; 
   parameter DADO_UM_ZERO = 'b1001; 
   parameter DADO_UM_UM = 'b1100;
-
   logic [1:0] entrada;
 
+  // Definindo saídas de acordo a entrada.
   always_comb begin
     entrada <= SWI[3:2];
 
