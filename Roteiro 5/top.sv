@@ -44,7 +44,7 @@ module top(input  logic clk_2,
   parameter DOIS = 'b01011011;
   parameter TRES = 'b01001111;
   parameter QUATRO = 'b01100110;
-  parameter CINCO = 'b01100101;
+  parameter CINCO = 'b01101101;
   parameter SEIS = 'b01111101;
   parameter SETE = 'b00000111;
   parameter OITO = 'b01111111;
@@ -60,26 +60,56 @@ module top(input  logic clk_2,
   //SEG7 vai ser LED7
   logic reset;
   logic selecionador;
-  logic ent_serial;
-  logic [3:0] ent_paralela, saida;
+  logic [7:0] saida;
+  logic [3:0] contador;
 
   always_comb begin
     reset <= SWI[0];
     selecionador <= SWI[1];
-    ent_serial <= SWI[3];
-    ent_paralela <= SWI[7:4];
   end
 
-  always_ff @(posedge clk_2) begin
-    if (reset == 'b0) saida <= 'b0000;
-    else if (selecionador == 'b1) saida <= ent_paralela;
-    else begin
-      saida[0] <= saida[1];
-      saida[1] <= saida[2];
-      saida[2] <= saida[3];
-      saida[3] <= ent_serial;
-    end
+  function logic[7:0] conversor (logic[3:0] cont);
+    logic[7:0] y;
 
-    LED[7:4] <= saida;
+    case (cont)
+      4'b0000: y = ZERO;
+      4'b0001: y = UM;
+      4'b0010: y = DOIS;
+      4'b0011: y = TRES;
+      4'b0100: y = QUATRO;
+      4'b0101: y = CINCO;
+      4'b0110: y = SEIS;
+      4'b0111: y = SETE;
+      4'b1000: y = OITO;
+      4'b1001: y = NOVE;
+      4'b1010: y = LETRA_A;
+      4'b1011: y = LETRA_B;
+      4'b1100: y = LETRA_C;
+      4'b1101: y = LETRA_D;
+      4'b1110: y = LETRA_E;
+      4'b1111: y = LETRA_F;
+    endcase 
+
+    return y;
+  endfunction
+
+  always_ff @(posedge clk_2) begin
+    if (reset == 'b1) begin
+      contador <= 'b0000;
+      saida <= ZERO;
+    end
+    else if (selecionador == 'b0) begin
+      contador <= contador + 1;
+      saida <= conversor(contador);
+    end
+    else begin
+      contador <= contador - 1;
+      saida <= conversor(contador);
+    end
+  end
+
+  always_comb begin
+    LED[7] <= clk_2;
+    SEG <= saida;
   end
 endmodule
