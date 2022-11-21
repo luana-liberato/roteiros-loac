@@ -1,5 +1,5 @@
 // DESCRIPTION: Verilator: Systemverilog example module
-// Roteiro 4 - Registrador Serial e Paralelo - Luana dos Santos Liberato
+// Roteiro 5 - Luana dos Santos Liberato
 
 parameter divide_by=100000000;  // divisor do clock de referência
 // A frequencia do clock de referencia é 50 MHz.
@@ -62,10 +62,14 @@ module top(input  logic clk_2,
   logic selecionador;
   logic [7:0] saida;
   logic [3:0] contador;
+  logic ent_serial;
+  logic [1:0] contador_sequencial;
+  logic saida_led;
 
   always_comb begin
     reset <= SWI[0];
     selecionador <= SWI[1];
+    ent_serial <= SWI[2];
   end
 
   function logic[7:0] conversor (logic[3:0] cont);
@@ -93,10 +97,36 @@ module top(input  logic clk_2,
     return y;
   endfunction
 
+  function logic[1:0] verificarContSequencia (logic[1:0] cont);
+    logic [1:0] c;
+
+    if (cont == 'b11) begin
+      c = cont;
+    end
+    else begin
+      c = cont + 1;
+    end
+
+    return c;
+  endfunction
+
+  function logic verificarSequencia (logic[1:0] cont_seq);
+    logic l;
+
+    if (cont_seq == 'b11) begin
+      l = 'b1;
+    end
+    else begin
+      l = 'b0;
+    end
+
+    return l;
+  endfunction
+
   always_ff @(posedge clk_2) begin
     if (reset == 'b1) begin
       contador <= 'b0000;
-      saida <= ZERO;
+      saida <= 'b00000000;
     end
     else if (selecionador == 'b0) begin
       contador <= contador + 1;
@@ -106,10 +136,26 @@ module top(input  logic clk_2,
       contador <= contador - 1;
       saida <= conversor(contador);
     end
+
+    contador_sequencial <= verificarContSequencia(contador_sequencial);
+    
+    if (reset == 'b1) begin
+      contador_sequencial <= 'b00;
+      saida_led <= 'b0;
+    end
+    else if (ent_serial == 'b1) begin
+      contador_sequencial <= verificarContSequencia(contador_sequencial);
+      saida_led <= verificarSequencia(contador_sequencial);
+    end 
+    else begin
+      contador_sequencial <= 'b00;
+      saida_led <= 'b0;
+    end
   end
 
   always_comb begin
     LED[7] <= clk_2;
     SEG <= saida;
+    LED[0] <= saida_led;
   end
 endmodule
