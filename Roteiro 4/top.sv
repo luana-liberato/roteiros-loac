@@ -1,5 +1,5 @@
 // DESCRIPTION: Verilator: Systemverilog example module
-// Roteiro 4 - ROM - Luana dos Santos Liberato
+// Roteiro 4 - Registrador Serial | Paralelo - Luana dos Santos Liberato
 
 parameter divide_by=100000000;  // divisor do clock de referência
 // A frequencia do clock de referencia é 50 MHz.
@@ -39,20 +39,43 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  // Definido fios e os dados para leitura.
-  parameter DADO_ZERO_ZERO = 'b0011; 
-  parameter DADO_ZERO_UM = 'b0110; 
-  parameter DADO_UM_ZERO = 'b1001; 
-  parameter DADO_UM_UM = 'b1100;
-  logic [1:0] entrada;
+  // Definido fios.
+  logic reset;
+  logic selecionador;
+  logic ent_serial;
+  logic [3:0] ent_paralela, saida;
 
-  // Definindo saídas de acordo a entrada.
+  // Recebendo as entradas.
   always_comb begin
-    entrada <= SWI[3:2];
+    reset <= SWI[1];
+    selecionador <= SWI[2];
+    ent_serial <= SWI[3];
+    ent_paralela <= SWI[7:4];
+  end
 
-    if (entrada == 'b00) LED[7:4] <= DADO_ZERO_ZERO;
-    else if (entrada == 'b01) LED[7:4] <= DADO_ZERO_UM;
-    else if (entrada == 'b10) LED[7:4] <= DADO_UM_ZERO;
-    else LED[7:4] <= DADO_UM_UM;
+  // Lógica do funcionamento de um registrador considerando inicialmente o reset, depois a entrada parelala e por último a lógica de um deslocamento.
+  always_ff @(posedge clk_2) begin
+    if (reset == 'b1) begin
+      saida <= 'b0000;
+    end
+
+    else if (selecionador == 'b1) begin
+      saida <= ent_paralela;
+    end
+
+    else begin
+      saida[3] <= ent_serial;
+      saida[2] <= saida[3];
+      saida[1] <= saida[2];
+      saida[0] <= saida[1];      
+    end
+  end
+
+  // Definindo saídas.
+  always_comb begin
+    LED[7:4] <= saida;
+
+    // Led que marca o clock.
+    LED[0] <= clk_2;
   end
 endmodule
